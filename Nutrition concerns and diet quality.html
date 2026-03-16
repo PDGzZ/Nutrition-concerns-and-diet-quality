@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外卖消费行为与膳食质量分析 · 营养关注度对比</title>
+    <!-- Chart.js 轻量可视化 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- 现代化字体 Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #f4f7fb;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+        .dashboard {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+            padding: 2rem 2rem 2.5rem;
+            transition: all 0.2s ease;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0b1e33;
+            margin: 0 0 0.2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #54708f;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2d7a9b;
+            padding-left: 1rem;
+            background: #f0f6fa;
+            border-radius: 0 12px 12px 0;
+            line-height: 1.4;
+            width: fit-content;
+            padding: 0.6rem 1.2rem;
+        }
+        .chart-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 1.8rem 1.5rem 1.8rem;
+            box-shadow: 0 8px 20px -6px rgba(0, 32, 64, 0.08);
+            border: 1px solid rgba(164, 192, 214, 0.25);
+            margin: 1.5rem 0 2rem;
+            transition: box-shadow 0.2s;
+        }
+        .chart-card:hover {
+            box-shadow: 0 20px 28px -8px rgba(21, 76, 122, 0.12);
+            border-color: #cbdbe9;
+        }
+        .chart-title {
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: #1a3a4f;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-title span {
+            background: #e2ecf5;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.8rem;
+            color: #1e587b;
+            font-weight: 500;
+        }
+        .canvas-container {
+            position: relative;
+            height: 360px;
+            width: 100%;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .analysis-section {
+            background: #f8fbfe;
+            border-radius: 28px;
+            padding: 2rem 2.2rem;
+            margin-top: 1.5rem;
+            border: 1px solid #d9e6f2;
+            box-shadow: inset 0 1px 3px #ffffff, 0 8px 18px -10px #2c5777;
+        }
+        .analysis-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0c3346;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+        .analysis-section h2:after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #abc9de, transparent);
+            margin-left: 1.5rem;
+        }
+        .analysis-text {
+            color: #1a3f53;
+            line-height: 1.7;
+            font-size: 1.02rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .analysis-text p {
+            margin: 0;
+        }
+        .insight-badge {
+            background: white;
+            border-radius: 16px;
+            padding: 0.9rem 1.5rem;
+            border-left: 5px solid #3d8f9c;
+            box-shadow: 0 3px 10px rgba(0,30,50,0.05);
+            font-weight: 500;
+        }
+        .footnote {
+            margin-top: 1.8rem;
+            color: #708aa5;
+            font-size: 0.9rem;
+            text-align: right;
+            border-top: 1px dashed #b9d0e2;
+            padding-top: 1rem;
+        }
+        .footnote i {
+            font-style: normal;
+            background: #e1eff9;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+        }
+        @media (max-width: 700px) {
+            .canvas-container { height: 300px; }
+            .dashboard { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <h1>🍱 外卖消费行为与膳食质量分析 · 营养关注度对比</h1>
+    <div class="subtitle">订购外卖时是否注意营养搭配对膳食质量的影响 (N=25)</div>
+
+    <!-- 簇状柱状图卡片 -->
+    <div class="chart-card">
+        <div class="chart-title">📊 营养关注度与膳食质量 <span>达标率对比</span></div>
+        <div class="canvas-container">
+            <canvas id="attentionVsDietChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 文字分析 -->
+    <div class="analysis-section">
+        <h2>🔍 营养关注度与膳食质量的关系</h2>
+        <div class="analysis-text">
+            <p>根据C7“订购外卖时是否注意营养搭配”，将学生分为<strong>注意营养组（12人）</strong>和<strong>不注意营养组（13人）</strong>。对比两组在四项膳食核心指标上的达标率，探究营养关注度对膳食质量的影响。</p>
+            
+            <div class="insight-badge">
+                <strong>🥩 荤素各半 (D4)</strong> · 注意组达标率58.3% (7/12)，不注意组53.8% (7/13)。两组差异不明显，注意组略高，但基本持平，说明荤素搭配可能受其他因素影响更大。
+            </div>
+            
+            <div class="insight-badge">
+                <strong>🌅 每天早餐 (D5)</strong> · 注意组达标率41.7% (5/12) 显著高于不注意组7.7% (1/13)。注意营养的学生更倾向于规律吃早餐，二者存在强关联。
+            </div>
+            
+            <div class="insight-badge">
+                <strong>🥗 蔬果≥4次/周 (D11)</strong> · 注意组达标率33.3% (4/12) 低于不注意组46.2% (6/13)。这一结果与预期相反，可能由于注意营养组更关注整体搭配但蔬果摄入仍不足，或不注意组通过其他方式补充蔬果。样本量较小也可能是原因。
+            </div>
+            
+            <div class="insight-badge">
+                <strong>⏳ 进餐有规律 (D20)</strong> · 注意组达标率41.7% (5/12) 远高于不注意组7.7% (1/13)。与早餐习惯类似，注意营养的学生进餐规律性明显更好。
+            </div>
+
+            <p>综合来看，<strong>注意营养搭配的学生在早餐习惯和进餐规律性上显著优于不注意者</strong>，表明营养关注度与良好膳食行为正相关。然而，在蔬果摄入上注意组反而偏低，可能与注意组更倾向于选择高蛋白食物而忽视蔬果有关，也提醒我们营养关注需更全面。荤素搭配两组接近。总体而言，培养外卖时的营养关注意识对改善部分膳食指标（早餐、规律性）有积极作用，但对蔬果摄入的促进尚不明显，需要更精准的干预。</p>
+        </div>
+        <div class="footnote">
+            <i>数据基于问卷星收集 · 截止2026.3.13</i> &nbsp; 图表交互：悬停显示详细达标人数/比例
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 注意组12人，不注意组13人
+        // 达标率（%）
+        const attention = [58.3, 41.7, 33.3, 41.7];   // 荤素, 早餐, 蔬果, 规律
+        const nonAttention = [53.8, 7.7, 46.2, 7.7];
+
+        // 实际人数 (用于tooltip)
+        const attCounts = ['7/12', '5/12', '4/12', '5/12'];
+        const nonCounts = ['7/13', '1/13', '6/13', '1/13'];
+
+        const ctx = document.getElementById('attentionVsDietChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['荤素各半', '每天早餐', '蔬果≥4次/周', '进餐有规律'],
+                datasets: [
+                    {
+                        label: '注意营养组 (n=12)',
+                        data: attention,
+                        backgroundColor: '#5f9fc0',
+                        borderRadius: 6,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8,
+                    },
+                    {
+                        label: '不注意营养组 (n=13)',
+                        data: nonAttention,
+                        backgroundColor: '#e68c7c',
+                        borderRadius: 6,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        backgroundColor: '#0f2a3b',
+                        callbacks: {
+                            label: (context) => {
+                                const datasetLabel = context.dataset.label || '';
+                                const value = context.raw.toFixed(1);
+                                let countDetail = '';
+                                if (context.datasetIndex === 0) countDetail = ` (${attCounts[context.dataIndex]})`;
+                                else if (context.datasetIndex === 1) countDetail = ` (${nonCounts[context.dataIndex]})`;
+                                return `${datasetLabel}: ${value}% ${countDetail}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 12, family: 'Inter' }, usePointStyle: true, boxWidth: 10 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: '#d9e2ec' },
+                        border: { dash: [4,4] },
+                        title: {
+                            display: true,
+                            text: '达标率 (%)',
+                            color: '#54708f',
+                            font: { size: 12, family: 'Inter' }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 12, family: 'Inter' } }
+                    }
+                },
+                layout: {
+                    padding: { top: 20, bottom: 10 }
+                }
+            }
+        });
+    })();
+</script>
+</body>
+</html>
